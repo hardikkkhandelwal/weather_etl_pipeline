@@ -1,0 +1,74 @@
+[
+  {
+    "shipment_id": "SHIP-1001",
+    "cargo_type": "PHARMACEUTICALS",
+    "cargo_value_usd": 1250000.0,
+    "origin_hub_id": "MUM",
+    "destination_hub_id": "LON",
+    "departure_time": "2026-05-23T08:00:00",
+    "arrival_time": "2026-05-23T20:00:00"
+  },
+  {
+    "shipment_id": "SHIP-1002",
+    "cargo_type": "ELECTRONICS",
+    "cargo_value_usd": 850000.0,
+    "origin_hub_id": "TYO",
+    "destination_hub_id": "LAX",
+    "departure_time": "2026-05-24T14:30:00",
+    "arrival_time": "2026-05-25T02:30:00"
+  },
+  {
+    "shipment_id": "SHIP-1003",
+    "cargo_type": "GENERAL_MERCHANDISE",
+    "cargo_value_usd": 150000.0,
+    "origin_hub_id": "DXB",
+    "destination_hub_id": "SIN",
+    "departure_time": "2026-05-23T22:00:00",
+    "arrival_time": "2026-05-24T06:00:00"
+  },
+  {
+    "shipment_id": "SHIP-1004",
+    "cargo_type": "PHARMACEUTICALS",
+    "cargo_value_usd": 2400000.0,
+    "origin_hub_id": "LON",
+    "destination_hub_id": "NYC",
+    "departure_time": "2026-05-25T06:00:00",
+    "arrival_time": "2026-05-25T18:00:00"
+  },
+  {
+    "shipment_id": "SHIP-1005",
+    "cargo_type": "ELECTRONICS",
+    "cargo_value_usd": 3200000.0,
+    "origin_hub_id": "SIN",
+    "destination_hub_id": "PAR",
+    "departure_time": "2026-05-26T10:00:00",
+    "arrival_time": "2026-05-27T01:00:00"
+  },
+  {
+    "shipment_id": "SHIP-1006",
+    "cargo_type": "GENERAL_MERCHANDISE",
+    "cargo_value_usd": 8500.0,
+    "origin_hub_id": "LAX",
+    "destination_hub_id": "SYD",
+    "departure_time": "2026-05-24T18:00:00",
+    "arrival_time": "2026-05-25T12:00:00"
+  },
+  {
+    "shipment_id": "SHIP-1007",
+    "cargo_type": "PHARMACEUTICALS",
+    "cargo_value_usd": 1950000.0,
+    "origin_hub_id": "BER",
+    "destination_hub_id": "DXB",
+    "departure_time": "2026-05-26T04:00:00",
+    "arrival_time": "2026-05-26T15:00:00"
+  },
+  {
+    "shipment_id": "SHIP-1008",
+    "cargo_type": "ELECTRONICS",
+    "cargo_value_usd": 1150000.0,
+    "origin_hub_id": "PAR",
+    "destination_hub_id": "TYO",
+    "departure_time": "2026-05-25T12:00:00",
+    "arrival_time": "2026-05-26T06:00:00"
+  }
+]

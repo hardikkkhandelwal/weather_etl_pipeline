@@ -1,4 +1,5 @@
 requests
 pandas
-sqlalchemy
+sqlalchemy<2.0.0
+snowflake-connector-python[pandas]>=4.5.0
 snowflake-sqlalchemy

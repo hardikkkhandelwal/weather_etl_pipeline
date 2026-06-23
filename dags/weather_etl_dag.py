@@ -3,8 +3,8 @@ import requests
 import pandas as pd
 from datetime import datetime, timedelta
 from airflow.decorators import dag, task
-from sqlalchemy import create_engine
-from snowflake.sqlalchemy import URL
+import snowflake.connector
+from snowflake.connector.pandas_tools import write_pandas
 from airflow.hooks.base import BaseHook
 
 
@@ -40,7 +40,7 @@ def weather_etl_pipeline():
             "Dubai": {"lat": 25.2048, "lon": 55.2708},
             "Singapore": {"lat": 1.3521, "lon": 103.8198},
             "Los Angeles": {"lat": 34.0522, "lon": -118.2437}
-        } # We are starting with 10 top cities to test! You can easily expand this to 50 later.
+        }
 
         all_city_data = []
 
@@ -91,22 +91,38 @@ def weather_etl_pipeline():
             df = pd.DataFrame(transformed_records)
 
             # Fetch the secure connection from Airflow
-            conn = BaseHook.get_connection('snowflake_creds')
+            conn_creds = BaseHook.get_connection('snowflake_creds')
             
-            engine = create_engine(
-                URL(
-                    user=conn.login,
-                    password=conn.password,
-                    account=conn.host,
-                    database=conn.extra_dejson.get('database'),
-                    schema=conn.schema,
-                    warehouse=conn.extra_dejson.get('warehouse')
-                ))
-
+            # Robust parsing in case database is in the schema path (e.g. 'WEATHER_DB/WEATHER_SCHEMA')
+            db = conn_creds.extra_dejson.get('database')
+            schema = conn_creds.schema
+            if not db and schema and '/' in schema:
+                parts = schema.split('/')
+                db = parts[0]
+                schema = parts[1]
+                
+            # Connect using snowflake.connector
+            conn = snowflake.connector.connect(
+                user=conn_creds.login,
+                password=conn_creds.password,
+                account=conn_creds.host,
+                database=db,
+                schema=schema,
+                warehouse=conn_creds.extra_dejson.get('warehouse')
+            )
 
             # Load into Snowflake
-            df.to_sql('DAILY_WEATHER', engine, if_exists='append', index=False)
-            logging.info("Loading Successful! Data is in the cloud")
+            success, nchunks, nrows, _ = write_pandas(
+                conn=conn,
+                df=df,
+                table_name='DAILY_WEATHER',
+                auto_create_table=True
+            )
+            conn.close()
+            if success:
+                logging.info(f"Loading Successful! Loaded {nrows} rows to Snowflake Cloud.")
+            else:
+                logging.error("Failed to load data to Snowflake via write_pandas")
 
         except Exception as e:
             logging.error(f"Failed to load data to snowflake: {e}")

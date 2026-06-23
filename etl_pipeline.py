@@ -1,14 +1,15 @@
 import requests
 import pandas as pd
 import logging
-from sqlalchemy import create_engine
-from snowflake.sqlalchemy import URL
+import snowflake.connector
+from snowflake.connector.pandas_tools import write_pandas
 
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
+# Configuration using the new Snowflake Account Details
 SNOWFLAKE_USER = 'HARDIK'
 SNOWFLAKE_PASSWORD = 'aB3defGhIjKlMn'
 SNOWFLAKE_ACCOUNT = 'PAXVTTH-FT66584'
@@ -24,7 +25,7 @@ def extract_weather_data():
     try:
         response = requests.get(url, params=params)
         response.raise_for_status()
-        logging.info("Extraction Successfull")
+        logging.info("Extraction Successful")
         return response.json()['current_weather']
 
     except requests.exceptions.RequestException as e:
@@ -39,7 +40,7 @@ def transform_weather_data(raw_data):
 
         df.columns = df.columns.str.upper()
         df = df[['CITY','TIME','TEMPERATURE','WINDSPEED','WINDDIRECTION','WEATHERCODE']]
-        logging.info("Transfomation Successful!")
+        logging.info("Transformation Successful!")
         return df
     except Exception as e:
         logging.error(f"Transformation Failed: {e}")
@@ -48,18 +49,26 @@ def transform_weather_data(raw_data):
 def load_weather_data(df):
     logging.info("Starting Load Phase to Snowflake Cloud...")
     try:
-        engine = create_engine(
-            URL(
-                user=SNOWFLAKE_USER,
-                password=SNOWFLAKE_PASSWORD,
-                account=SNOWFLAKE_ACCOUNT,
-                database=SNOWFLAKE_DATABASE,
-                schema=SNOWFLAKE_SCHEMA,
-                warehouse=SNOWFLAKE_WAREHOUSE
-            ))
+        conn = snowflake.connector.connect(
+            user=SNOWFLAKE_USER,
+            password=SNOWFLAKE_PASSWORD,
+            account=SNOWFLAKE_ACCOUNT,
+            database=SNOWFLAKE_DATABASE,
+            schema=SNOWFLAKE_SCHEMA,
+            warehouse=SNOWFLAKE_WAREHOUSE
+        )
 
-        df.to_sql('DAILY_WEATHER', engine, if_exists='append', index=False)
-        logging.info("Loading Successfult! Data is in the cloud")
+        success, nchunks, nrows, _ = write_pandas(
+            conn=conn,
+            df=df,
+            table_name='DAILY_WEATHER',
+            auto_create_table=True
+        )
+        conn.close()
+        if success:
+            logging.info(f"Loading Successful! Loaded {nrows} rows to Snowflake Cloud.")
+        else:
+            logging.error("Failed to load data to Snowflake via write_pandas")
 
     except Exception as e:
         logging.error(f"Failed to load data to snowflake: {e}")
